@@ -18,6 +18,7 @@ editor_options:
 
 # this will make sure that the code doesn't run off the page when printing a report
 knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 50), tidy = TRUE)
+knitr::opts_knit$set(root.dir = 'C:/Users/aliad/OneDrive/Documents/R_PROJECTS/BIO-598_Final-Project_R/read-count-based_sex-classifier/')
 ```
 
 # Loading Libraries, Importing Data sets, and Selecting Genes
@@ -73,13 +74,13 @@ annotation_raw_data <- read.delim(paste0(data_dir,"Cell_lines_annotations_201812
 # Sellect genes that are included in the study
 
 # Define and store XIST gene
-XIST <- c("XIST")
+XIST_gene <- c("XIST")
 
 # Define an store the chosen list of X-linked genes
-X_linked_genes <- c("XIST","AMELX", "DDX3X", "EIF1AX", "KDM5C", "NLGN4X", "RPS4X","TBL1X", "TMSB4X", "USP9X", "KDM6A","ZFX")
+X_linked_genes <- c("DDX3X", "ZFX", "TGIF2LX", "PRKX", "USP9X", "PCDH11X", "NLGN4X", "RPS4X", "KDM5C", "TXLNG", "TBL1X", "EIF1AX", "TMSB4X")
 
 # Define and store the chosen list of Y-linlked genes
-Y_linked_genes <- c("AMELY", "DDX3Y", "EIF1AY", "KDM5D", "NLGN4Y", "RPS4Y1", "TBL1Y", "TMSB4Y", "USP9Y", "UTY", "ZFY")
+Y_linked_genes <- c("DDX3Y", "ZFY", "SRY", "TGIF2LY", "UTY", "PRKY", "USP9Y", "PCDH11Y", "NLGN4Y", "RPS4Y2", "KDM5D", "RPS4Y1", "TBL1Y", "EIF1AY", "TMSB4Y")
 ```
 
 # Pre-processing
@@ -90,7 +91,7 @@ Y_linked_genes <- c("AMELY", "DDX3Y", "EIF1AY", "KDM5D", "NLGN4Y", "RPS4Y1", "TB
 # Pre-process gene counts data set
 
 # Subset gene couts data set to include selected genes only
-gene_counts_data <- subset(gene_counts_raw_data, Description %in% X_linked_genes | Description %in% Y_linked_genes | Description %in% XIST)
+gene_counts_data <- subset(gene_counts_raw_data, Description %in% X_linked_genes | Description %in% Y_linked_genes | Description %in% XIST_gene)
 
 # Start by transposing the gene counts data and transforming it to a data frame
 gene_counts_data <- as.data.frame(t(gene_counts_data))
@@ -183,12 +184,15 @@ gene_counts_data <- gene_counts_data[, c("CCLE_ID","XIST", "sumXLinked", "sumYLi
 # Plot distributions of cell lines for each category and define thresholds as the corresponding medians of each category
 
 # Transform gene counts data into longer format for proper plotting
+gene_counts_data <- as.data.frame(gene_counts_data)
+gene_counts_data$XIST <- as.numeric(gene_counts_data$XIST)
 long_data <- pivot_longer(
   gene_counts_data, 
-  cols = c(XIST, sumXLinked, sumYLinked), 
+  cols = c("XIST", "sumXLinked", "sumYLinked"), 
   names_to = "Category", 
   values_to = "Value"
 )
+
 
 # Apply log2 transformation to the values
 long_data <- long_data %>%
